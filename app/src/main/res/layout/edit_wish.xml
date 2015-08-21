@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    android:orientation="vertical"
+    android:weightSum="1">
+
+    <EditText
+        android:id="@+id/edit_wish"
+        android:layout_width="261dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="31dp"
+        android:layout_marginRight="30dp"
+        android:layout_marginTop="24dp"
+        android:layout_weight="1"
+        android:background="@null"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:gravity="top"
+        android:maxHeight="200dp"
+        android:maxLength="140"
+        android:minHeight="100dp"
+        android:textColor="#696969"
+        android:textCursorDrawable="@null"
+        android:textSize="17sp" />
+
+    <CheckBox
+        android:id="@+id/edit_allowPublic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="31dp"
+        android:layout_marginTop="260dp"
+        android:background="#00FFFFFF"
+        android:button="@drawable/edit_allow_public_btn"
+        android:checked="true"
+        android:paddingLeft="5dp"
+        android:text="@string/allowPublic"
+        android:textColor="#60BAD5" />
+
+</RelativeLayout>

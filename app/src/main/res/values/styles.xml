@@ -1,0 +1,26 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <!--<item name="android:paddingLeft">0dp</item>-->
+        <!--<item name="android:paddingRight">13dp</item>-->
+        <!--<item name="android:layout_marginRight">12dp</item>-->
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="actionBarStyle">@style/MyActionBar</item>
+
+    </style>
+
+    <style name="MyActionBar" parent="@style/Widget.AppCompat.Light.ActionBar">
+        <!--设置ActionBar的背景-->
+        <item name="background">@color/actionBar_BG</item>
+    </style>
+
+    <style name="MyDialog" parent="Theme.AppCompat.Dialog">
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowBackground">@drawable/custom_dialog_frame</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+</resources>

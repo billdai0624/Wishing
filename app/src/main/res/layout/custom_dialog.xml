@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="285dp"
+    android:layout_height="166dp"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/dialogQuestion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="13dp"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="#4D4D4D"
+        android:textSize="16sp" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="41dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/cancel_btn"
+            android:layout_width="101dp"
+            android:layout_height="36dp"
+            android:background="@drawable/custom_cancel_btn"
+            android:gravity="center"
+            android:text="@string/cancel_label"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/confirm_btn"
+            android:layout_width="101dp"
+            android:layout_height="36dp"
+            android:layout_marginLeft="26dp"
+            android:background="@drawable/custom_confirm_btn"
+            android:gravity="center"
+            android:text="@string/confirm_label"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp" />
+    </LinearLayout>
+</LinearLayout>

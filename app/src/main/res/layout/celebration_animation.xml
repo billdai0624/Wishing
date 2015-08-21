@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_celebrate"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:id="@+id/all_celebration_material"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true">
+
+        <ImageView
+            android:id="@+id/celebration_material1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_marginBottom="238dp"
+            android:layout_marginLeft="97dp"
+            android:background="@drawable/celebrate_material1" />
+
+        <ImageView
+            android:id="@+id/celebration_material2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+
+            android:layout_alignParentLeft="true"
+            android:layout_marginBottom="314dp"
+            android:layout_marginLeft="140dp"
+            android:background="@drawable/celebrate_material2" />
+
+        <ImageView
+            android:id="@+id/celebration_material3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_marginBottom="301dp"
+            android:layout_marginLeft="164dp"
+            android:background="@drawable/celebrate_material3" />
+
+        <ImageView
+            android:id="@+id/celebration_material4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_marginBottom="274dp"
+            android:layout_marginLeft="180dp"
+            android:background="@drawable/celebrate_material4" />
+    </RelativeLayout>
+
+</RelativeLayout>

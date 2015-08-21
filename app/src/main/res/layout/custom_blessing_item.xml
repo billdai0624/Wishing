@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/wish_item_selector"
+    android:descendantFocusability="blocksDescendants"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/blessingItem_LL"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="80dp"
+        android:orientation="horizontal">
+
+        <CheckBox
+            android:id="@+id/blessing_realized"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginLeft="8dp"
+            android:background="@drawable/realized_selector"
+            android:button="@null"
+            android:checked="false"
+            android:enabled="false"
+            android:focusable="false" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="6dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="14dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/blessing_wish"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:gravity="left|top"
+                android:maxLines="2"
+                android:minHeight="38dp"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="#696969"
+                android:textSize="17sp" />
+
+            <TextView
+                android:id="@+id/blessing_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="#D2D2D2"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/blessing_toDetail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@drawable/btn_to_detail"
+            android:focusable="false" />
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1px"
+        android:background="#CAF3FF" />
+</LinearLayout>

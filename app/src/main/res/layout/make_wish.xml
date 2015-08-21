@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_makewish"
+        android:orientation="vertical"
+        android:weightSum="1">
+
+        <ImageView
+            android:id="@+id/wish_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="30dp"
+            android:layout_marginTop="67dp"
+            android:background="@drawable/title_makewish" />
+
+        <EditText
+            android:id="@+id/myWish"
+            android:layout_width="219dp"
+            android:layout_height="140dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_weight="1"
+            android:background="@null"
+            android:cursorVisible="true"
+            android:focusable="true"
+            android:gravity="top"
+
+            android:layerType="software"
+            android:maxLength="140"
+            android:maxLines="7"
+            android:textColor="#696969"
+            android:textSize="17sp" />
+
+        <CheckBox
+            android:id="@+id/allowPublic"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:background="#00FFFFFF"
+            android:button="@drawable/allow_public_selector"
+            android:checked="true"
+            android:paddingLeft="4dp"
+            android:text="@string/allowPublic"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp" />
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="166dp"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageButton
+                android:id="@+id/send"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="21dp"
+                android:background="@drawable/send_wish_selector"
+                android:text="Send" />
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/skip"
+        android:layout_width="75dp"
+        android:layout_height="50dp"
+        android:layout_gravity="bottom|right"
+        android:layout_marginBottom="20dp"
+        android:layout_marginRight="20dp"
+        android:background="#00FFFFFF"
+        android:text="@string/skip"
+        android:textColor="@drawable/skip_selector"
+        android:textSize="17sp" />
+</FrameLayout>

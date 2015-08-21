@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF">
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <com.intern.ab.starwish.CustomViewPager
+            android:id="@+id/viewpager"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+        </com.intern.ab.starwish.CustomViewPager>
+
+        <LinearLayout
+            android:id="@+id/multiChoices"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_gravity="center_horizontal"
+            android:background="#60BAD5"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <Button
+                android:id="@+id/selectAll"
+                android:layout_width="160dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="#60BAD5"
+                android:text="@string/selectAll"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp" />
+
+            <Button
+                android:id="@+id/cancelDelete"
+                android:layout_width="160dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="#60BAD5"
+                android:clickable="false"
+                android:text="@string/cancelDelete"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp" />
+        </LinearLayout>
+
+        <RadioGroup
+            android:id="@+id/tabsGroup"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:background="#60BAD5"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/tab1"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="0dp"
+                android:layout_weight="1"
+                android:background="#60BAD5"
+                android:button="@null"
+                android:checked="true"
+                android:drawableTop="@drawable/my_wish_tab_selector"
+                android:textSize="17sp" />
+
+            <RadioButton
+                android:id="@+id/tab2"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:background="#60BAD5"
+                android:button="@null"
+                android:drawableTop="@drawable/star_wall_tab_selector"
+                android:textSize="17sp" />
+
+            <RadioButton
+                android:id="@+id/tab3"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_gravity="center"
+                android:layout_marginRight="0dp"
+                android:layout_weight="1"
+                android:background="#60BAD5"
+                android:button="@null"
+                android:drawableTop="@drawable/my_bless_tab_selector"
+                android:gravity="center"
+                android:textSize="17sp" />
+
+
+        </RadioGroup>
+
+    </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/makeWish"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|right"
+        android:layout_marginBottom="82dp"
+        android:layout_marginRight="18dp"
+        android:background="@drawable/make_wish_button_selector" />
+</FrameLayout>

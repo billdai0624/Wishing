@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/wishList_FL"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    android:orientation="vertical">
+
+    <ListView
+        android:id="@+id/wishList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:background="#FFFFFF"
+        android:cacheColorHint="@android:color/transparent"
+        android:divider="@null" />
+
+    <ImageView
+        android:id="@+id/makeWish_hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|right"
+        android:layout_marginBottom="83dp"
+        android:layout_marginRight="65dp"
+        android:background="@drawable/bg_mywish"
+        android:visibility="gone" />
+</FrameLayout>

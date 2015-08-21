@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    android:orientation="vertical">
+
+    <RadioGroup
+        android:id="@+id/category"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:background="#ADDEEC"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/hot"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:background="#00FFFFFF"
+            android:button="@null"
+            android:drawablePadding="-4dp"
+            android:gravity="center"
+            android:text="@string/hot_title"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp" />
+
+        <RadioButton
+            android:id="@+id/newest"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:background="#00FFFFFF"
+            android:button="@null"
+            android:checked="true"
+            android:drawablePadding="-4dp"
+            android:gravity="center"
+            android:text="@string/new_title"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp" />
+
+        <RadioButton
+            android:id="@+id/near"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:background="#00FFFFFF"
+            android:button="@null"
+            android:drawablePadding="-4dp"
+            android:gravity="center"
+            android:text="@string/near_title"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp" />
+    </RadioGroup>
+
+    <ListView
+        android:id="@+id/publicWish_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_horizontal"
+        android:cacheColorHint="@android:color/transparent"
+        android:divider="@null" />
+</LinearLayout>
