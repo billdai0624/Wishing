@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,6 +21,7 @@ import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,7 +34,7 @@ import static android.widget.CompoundButton.OnClickListener;
 
 public class WishAdapter extends ArrayAdapter<Wish_item> {
     //static final String ip = "http://10.0.3.2";
-    static final String ip = "http://192.168.0.112";
+    static final String ip = "http://192.168.0.111";
     static String device_id;
     public ViewHolder holder;
     DBHelper dbHelper;
@@ -94,8 +97,18 @@ public class WishAdapter extends ArrayAdapter<Wish_item> {
         b.putString("detailWish", getItem(position).getWish());
         b.putString("detailTime", getItem(position).getTime());
         b.putInt("recNo", getItem(position).getRecNo());
+        b.putBoolean("Public", getItem(position).isPublic());
         //((MainActivity) getContext()).setBundle(b);
         ((MainActivity) getContext()).toDetailWish(position, b);
+    }
+
+    private boolean isConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+        if (networkInfo != null && networkInfo.isConnected()) {
+            return true;
+        }
+        return false;
     }
 
     class ViewHolder {
@@ -115,26 +128,50 @@ public class WishAdapter extends ArrayAdapter<Wish_item> {
 
         @Override
         public void onClick(View v) {
-            if (!getItem(position).isRealized()) {
-                dialog = new Dialog(getContext(), R.style.MyDialog);
-                dialog.setContentView(R.layout.custom_dialog);
-                Button cancel = (Button) dialog.findViewById(R.id.cancel_btn);
-                Button confirm = (Button) dialog.findViewById(R.id.confirm_btn);
-                TextView question = (TextView) dialog.findViewById(R.id.dialogQuestion);
-                question.setText(getContext().getString(R.string.realized_confirm));
-                cancel.setOnClickListener(new dialogOnClick(position));
-                confirm.setOnClickListener(new dialogOnClick(position));
-                dialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
-                    @Override
-                    public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
-                        if (keyCode == KeyEvent.KEYCODE_BACK) {
-                            dialog.dismiss();
+            if (isConnected()) {
+                if (!getItem(position).isRealized()) {
+                    dialog = new Dialog(getContext(), R.style.MyDialog);
+                    dialog.setContentView(R.layout.custom_dialog);
+                    Button cancel = (Button) dialog.findViewById(R.id.cancel_btn);
+                    Button confirm = (Button) dialog.findViewById(R.id.confirm_btn);
+                    TextView question = (TextView) dialog.findViewById(R.id.dialogQuestion);
+                    question.setText(getContext().getString(R.string.realized_confirm));
+                    cancel.setOnClickListener(new dialogOnClick(position));
+                    confirm.setOnClickListener(new dialogOnClick(position));
+                    dialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
+                        @Override
+                        public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+                            if (keyCode == KeyEvent.KEYCODE_BACK) {
+                                getItem(position).setRealized(false);
+                                notifyDataSetChanged();
+                                dialog.dismiss();
+                            }
+                            return false;
                         }
-                        return false;
+                    });
+                    dialog.setCancelable(false);
+                    dialog.show();
+                } else {
+                    if (getItem(position).isPublic()) {
+                        JSONObject updateRealized = new JSONObject();
+                        try {
+                            updateRealized.put("realized", 0);
+                            updateRealized.put("device_id", device_id);
+                            updateRealized.put("SQLite_id", getItem(position).getId());
+                            new updateRealized().execute(updateRealized);
+                        } catch (JSONException e) {
+                            Log.e("JSONError", e.toString());
+                        }
+                        getItem(position).setRealized(false);
+                        notifyDataSetChanged();
                     }
-                });
-                dialog.setCancelable(false);
-                dialog.show();
+                    ContentValues contentValues = new ContentValues();
+                    contentValues.put("Realized", 0);
+                    db.update("wish", contentValues, "_Id=?", new String[]{Integer.toString(getItem(position).getId())});
+                }
+            } else {
+                Toast.makeText(getContext(), getContext().getResources().getString(R.string.no_network), Toast.LENGTH_LONG).show();
+            }
                 /*AlertDialog.Builder ask_realized = new AlertDialog.Builder(getContext());
                 ask_realized.setTitle(R.string.realized_title)
                         .setMessage(R.string.realized_confirm)
@@ -159,9 +196,48 @@ public class WishAdapter extends ArrayAdapter<Wish_item> {
                         })
                         .setCancelable(false)
                         .show();*/
-            } else {
-                getItem(position).setRealized(false);
-            }
+                /*JSONObject updateRealized = new JSONObject();
+                ContentValues contentValues = new ContentValues();
+                if (getItem(position).isRealized()) {
+                    //Cancel
+                    try {
+                        updateRealized.put("realized", 0);
+                        updateRealized.put("device_id", device_id);
+                        updateRealized.put("SQLite_id", getItem(position).getId());
+                        new updateRealized().execute(updateRealized);
+                        contentValues.put("Realized", 0);
+                    } catch (JSONException e) {
+                        Log.e("JSONError", e.toString());
+                    }
+                    getItem(position).setRealized(false);
+                    notifyDataSetChanged();
+                }
+                else{
+                    if (getItem(position).isPublic()) {
+                        JSONObject JObj = new JSONObject();
+                        updateRealized = new JSONObject();
+                        try {
+                            JObj.put("device_id", device_id);
+                            JObj.put("SQLite_id", getItem(position).getId());
+                            JObj.put("wish", getItem(position).getWish());
+                            updateRealized.put("realized", 1);
+                            updateRealized.put("device_id", device_id);
+                            updateRealized.put("SQLite_id", getItem(position).getId());
+                            new GcmBroadcast().execute(JObj);
+                            new updateRealized().execute(updateRealized);
+                        } catch (JSONException e) {
+                            Log.e("JSONError", e.toString());
+                        }
+                    }
+                    contentValues.put("Realized", 1);
+                    getItem(position).setRealized(true);
+                    notifyDataSetChanged();
+                    Intent intent = new Intent();
+                    intent.setClass(getContext(), Celebration_animation.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                    getContext().startActivity(intent);
+                }
+            db.update("wish", contentValues, "_Id=?", new String[]{Integer.toString(getItem(position).getId())});*/
         }
     }
 
@@ -176,7 +252,7 @@ public class WishAdapter extends ArrayAdapter<Wish_item> {
         public void onClick(View v) {
             JSONObject updateRealized = new JSONObject();
             if (v.getId() == R.id.cancel_btn) {
-                if (getItem(position).isRealized()) {
+                /*if (getItem(position).isRealized()) {
                     try {
                         updateRealized.put("realized", 0);
                         updateRealized.put("device_id", device_id);
@@ -186,6 +262,8 @@ public class WishAdapter extends ArrayAdapter<Wish_item> {
                         Log.e("JSONError", e.toString());
                     }
                 }
+                getItem(position).setRealized(false);
+                notifyDataSetChanged();*/
                 getItem(position).setRealized(false);
                 notifyDataSetChanged();
                 dialog.dismiss();

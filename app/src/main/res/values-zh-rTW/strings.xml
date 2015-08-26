@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Wishing</string>
+    <string name="no_network">請檢查網路連接後再重試</string>
+    <string name="allowPublic">秀出您的願望</string>
+    <string name="wish_title">Make a wish</string>
+    <string name="selectAll">選擇全部</string>
+    <string name="cancelDelete">取消</string>
+    <string name="edit_allowPublic">Public</string>
+    <string name="myWish_title">我的星願</string>
+    <string name="select_title">選擇</string>
+    <string name="selectAll_label">選擇全部</string>
+    <string name="cancelAll_label">取消全部</string>
+    <string name="multiDelete_confirm">您要讓這些星願消失嗎？</string>
+    <string name="realized_title">Wish fulfillment</string>
+    <string name="realized_confirm">這個願望實現了嗎？</string>
+    <string name="confirm_label">是</string>
+    <string name="congratulation">恭喜您！</string>
+    <string name="cancel_label">否</string>
+    <string name="myBless_title">我的祝福</string>
+    <string name="wish_denial_toast">為自己許個願望吧!</string>
+    <string name="editWish_title">編輯</string>
+    <string name="detailWish_bless_title">我的星願</string>
+    <string name="singleDelete_confirm">您要讓這個星願消失嗎</string>
+    <string name="wishWall_title">星願牆</string>
+    <string name="hot_title">熱門</string>
+    <string name="new_title">最新</string>
+    <string name="near_title">附近</string>
+    <string name="skip">跳過</string>
+    <string name="bless">祝福</string>
+    <string name="edit_menuItem_title">編輯</string>
+    <string name="delete_menuItem_title">刪除</string>
+    <string name="save_menuItem_title">儲存</string>
+    <string name="realization_notification_former">好消息!\n\"</string>
+    <string name="realization_notification_latter">\"\n已經實現了!</string>
+    <string name="multiDelete_hint">請選擇您要刪除的願望</string>
+</resources>

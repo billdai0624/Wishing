@@ -28,20 +28,21 @@
         android:layout_marginTop="11dp"
         android:orientation="horizontal">
 
-        <ImageView
+        <CheckBox
             android:id="@+id/blessing_cheeringIcon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/btn_good_pressed" />
+            android:background="@drawable/cheering_selector"
+            android:button="@null" />
 
         <TextView
             android:id="@+id/blessing_cheeringNum"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
+            android:layout_gravity="center_vertical"
             android:text="123"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textColor="#D2D2D2"
+            android:textColor="#AAAAAA"
             android:textSize="11sp" />
 
         <FrameLayout
@@ -52,9 +53,10 @@
                 android:id="@+id/blessing_detailTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="bottom|right"
+                android:layout_gravity="center_vertical|right"
+                android:text="123"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textColor="#D2D2D2"
+                android:textColor="#AAAAAA"
                 android:textSize="11sp" />
         </FrameLayout>
 

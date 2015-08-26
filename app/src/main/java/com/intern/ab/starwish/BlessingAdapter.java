@@ -45,7 +45,13 @@ public class BlessingAdapter extends ArrayAdapter<Blessing_item> {
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
-        holder.realized.setChecked(item.isRealized());
+        if(item.isRealized()){
+            holder.realized.setChecked(item.isRealized());
+            holder.realized.setVisibility(View.VISIBLE);
+        }
+        else{
+            holder.realized.setVisibility(View.INVISIBLE);
+        }
         holder.wish.setText(item.getWish());
         holder.time.setText(item.getTime());
         holder.toDetail.setOnClickListener(new toDetailListener(position, item.getCheeringNum(), item.getId()));

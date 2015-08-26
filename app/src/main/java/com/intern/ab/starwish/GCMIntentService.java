@@ -52,7 +52,7 @@ public class GCMIntentService extends IntentService {
                         {
                         }
                     }*/
-                String msg = "The wish:\n\"" + extras.getString("message") + "\"\nhas been realized!\tCongratulations!";
+                String msg = getString(R.string.realization_notification_former) + extras.getString("message") + getString(R.string.realization_notification_latter);
                 Log.i(TAG, "Completed work @ " + SystemClock.elapsedRealtime());
                 sendNotification(msg);
                 Log.i(TAG, "Received: " + extras.toString());

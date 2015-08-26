@@ -1,9 +1,12 @@
 package com.intern.ab.starwish;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -24,6 +27,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,7 +41,7 @@ public class WishList extends Fragment {
     public static final int SINGLE_MODE = 0;
     public static final int MULTI_MODE = 1;
     //static final String ip = "http://10.0.3.2";
-    static final String ip = "http://192.168.0.112";
+    static final String ip = "http://192.168.0.111";
     static String device_id;
     public int mode = 0;
     public Menu menu;
@@ -93,25 +97,31 @@ public class WishList extends Fragment {
             selectedNumTv.setVisibility(View.VISIBLE);
             selectedNumTv.setText("(0)");
             changeMode();*/
-            dialog = new Dialog(getActivity(), R.style.MyDialog);
-            dialog.setContentView(R.layout.custom_dialog);
-            Button cancel = (Button) dialog.findViewById(R.id.cancel_btn);
-            Button confirm = (Button) dialog.findViewById(R.id.confirm_btn);
-            TextView question = (TextView) dialog.findViewById(R.id.dialogQuestion);
-            question.setText(getString(R.string.multiDelete_confirm));
-            cancel.setOnClickListener(new dialogOnClick());
-            confirm.setOnClickListener(new dialogOnClick());
-            dialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
-                @Override
-                public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
-                    if (keyCode == KeyEvent.KEYCODE_BACK) {
-                        dialog.dismiss();
+            if (!isConnected()) {
+                Toast.makeText(getActivity(), getString(R.string.no_network), Toast.LENGTH_LONG).show();
+            } else if (selectedNum == 0) {
+                Toast.makeText(getActivity(), getString(R.string.multiDelete_hint), Toast.LENGTH_SHORT).show();
+            } else {
+                dialog = new Dialog(getActivity(), R.style.MyDialog);
+                dialog.setContentView(R.layout.custom_dialog);
+                Button cancel = (Button) dialog.findViewById(R.id.cancel_btn);
+                Button confirm = (Button) dialog.findViewById(R.id.confirm_btn);
+                TextView question = (TextView) dialog.findViewById(R.id.dialogQuestion);
+                question.setText(getString(R.string.multiDelete_confirm));
+                cancel.setOnClickListener(new dialogOnClick());
+                confirm.setOnClickListener(new dialogOnClick());
+                dialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
+                    @Override
+                    public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+                        if (keyCode == KeyEvent.KEYCODE_BACK) {
+                            dialog.dismiss();
+                        }
+                        return false;
                     }
-                    return false;
-                }
-            });
-            dialog.setCancelable(false);
-            dialog.show();
+                });
+                dialog.setCancelable(false);
+                dialog.show();
+            }
         }
         if (item.getItemId() == android.R.id.home) {
             menu.findItem(R.id.delete).setVisible(false);
@@ -147,6 +157,7 @@ public class WishList extends Fragment {
         selectAll = ((MainActivity) getActivity()).selectAll;
         delete = ((MainActivity) getActivity()).delete;
         items = new ArrayList<Wish_item>();
+
         cursor = db.rawQuery("SELECT _Id, Wish, DateTime, Realized, Public, rowid " +
                 "FROM wish ORDER BY DateTime DESC", null);
         while (cursor.moveToNext()) {
@@ -307,6 +318,14 @@ public class WishList extends Fragment {
         }
     }
 
+    private boolean isConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+        if (networkInfo != null && networkInfo.isConnected()) {
+            return true;
+        }
+        return false;
+    }
 
     class onClickListener implements View.OnClickListener {
         @Override
@@ -396,6 +415,7 @@ public class WishList extends Fragment {
                 dialog.dismiss();
                 selectAll.setText(getString(R.string.selectAll_label));
                 selectAllFlag = true;
+                ((MainActivity) getActivity()).shouldRefresh = true;
                 ((MainActivity) getActivity()).onBackPressed();
             }
         }

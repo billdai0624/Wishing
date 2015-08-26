@@ -11,6 +11,8 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -45,7 +47,7 @@ public class EditWish extends AppCompatActivity implements LocationListener {
     static final int UPDATE = 1;
     static final int DELETE = 2;
     //static final String ip = "http://10.0.3.2";
-    static final String ip = "http://192.168.0.112";
+    static final String ip = "http://192.168.0.111";
     static final String geoAPI = "AIzaSyC09zMRrsFJhnEX9puE494TYRbsi9tIpAU";
     static String device_id;
     ActionBar actionBar;
@@ -118,7 +120,7 @@ public class EditWish extends AppCompatActivity implements LocationListener {
         editWish.setSelection(detailWish.length());
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         edit_allowPublic = (CheckBox) this.findViewById(R.id.edit_allowPublic);
-
+        edit_allowPublic.setChecked(getIntent().getBooleanExtra("detailPublic", true));
     }
 
     public void initActionBar() {
@@ -200,6 +202,15 @@ public class EditWish extends AppCompatActivity implements LocationListener {
         return JObj;
     }
 
+    private boolean isConnected() {
+        ConnectivityManager cm = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+        if (networkInfo != null && networkInfo.isConnected()) {
+            return true;
+        }
+        return false;
+    }
+
     @Override
     public void onBackPressed() {
         //super.onBackPressed();
@@ -225,48 +236,57 @@ public class EditWish extends AppCompatActivity implements LocationListener {
                 bun.putString("editTime", android.text.format.DateFormat.format("yyyy-MM-dd hh:mm", new Date().getTime()).toString());
                 bun.putBoolean("edit_allowPublic", edit_allowPublic.isChecked());
                 intent.putExtras(bun);*/
-                detailWish_id = getIntent().getStringExtra("detailWish_id");
-                cursor = db.rawQuery("SELECT Public FROM wish WHERE _Id=?", new String[]{detailWish_id});
-                cursor.moveToNext();
-                int oldPublic = cursor.getInt(0);
-                cursor.close();
-                int newPublic = (edit_allowPublic.isChecked()) ? 1 : 0;
-                ContentValues contentValues = new ContentValues();
-                contentValues.put("Wish", editWish.getText().toString());
-                contentValues.put("DateTime", new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date().getTime()));
-                if (longitude != 0 || latitude != 0) {
-                    contentValues.put("Longitude", longitude);
-                    contentValues.put("Latitude", latitude);
-                }
-                contentValues.put("Public", newPublic);
-                db.update("wish", contentValues, "_Id=?", new String[]{detailWish_id});
-                JSONObject JObj = new JSONObject();
-                try {
-                    JObj.put("Wish", editWish.getText().toString());
-                    JObj.put("DateTime", new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date().getTime()));
-                    JObj.put("Longitude", longitude);
-                    JObj.put("Latitude", latitude);
-                    JObj.put("Cheering", 0);
-                    JObj.put("country", getApplication().getResources().getConfiguration().locale.getDisplayCountry());
-                    JObj.put("SQLite_id", Integer.valueOf(detailWish_id));
-                    JObj.put("Realized", 0);
-                    JObj.put("device_id", device_id);
-                } catch (JSONException e) {
-                    Log.e("JSonError", e.toString());
-                }
-                if (oldPublic == 0 && newPublic == 0) {
-                } else if (oldPublic == 0 && newPublic == 1) {
-                    //Insert into SQL
-                    new SendToSQL(INSERT).execute(JObj);
-                } else if (oldPublic == 1 && newPublic == 0) {
-                    //Delete from SQL
-                    new SendToSQL(DELETE).execute(JObj);
+                if (isConnected()) {
+                    if ("".equals(editWish.getText().toString().trim()) || null == db) {
+                        Toast.makeText(getApplicationContext(), getString(R.string.wish_denial_toast), Toast.LENGTH_LONG).show();
+                    } else {
+                        detailWish_id = getIntent().getStringExtra("detailWish_id");
+                        cursor = db.rawQuery("SELECT Public FROM wish WHERE _Id=?", new String[]{detailWish_id});
+                        cursor.moveToNext();
+                        int oldPublic = cursor.getInt(0);
+                        cursor.close();
+                        int newPublic = (edit_allowPublic.isChecked()) ? 1 : 0;
+                        ContentValues contentValues = new ContentValues();
+                        contentValues.put("Wish", editWish.getText().toString());
+                        contentValues.put("DateTime", new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date().getTime()));
+                        if (longitude != 0 || latitude != 0) {
+                            contentValues.put("Longitude", longitude);
+                            contentValues.put("Latitude", latitude);
+                        }
+                        contentValues.put("Public", newPublic);
+                        db.update("wish", contentValues, "_Id=?", new String[]{detailWish_id});
+                        JSONObject JObj = new JSONObject();
+                        try {
+                            JObj.put("Wish", editWish.getText().toString());
+                            JObj.put("DateTime", new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date().getTime()));
+                            JObj.put("Longitude", longitude);
+                            JObj.put("Latitude", latitude);
+                            JObj.put("Cheering", 0);
+                            JObj.put("country", getApplication().getResources().getConfiguration().locale.getDisplayCountry());
+                            JObj.put("SQLite_id", Integer.valueOf(detailWish_id));
+                            JObj.put("Realized", 0);
+                            JObj.put("device_id", device_id);
+                        } catch (JSONException e) {
+                            Log.e("JSonError", e.toString());
+                        }
+                        if (oldPublic == 0 && newPublic == 0) {
+                        } else if (oldPublic == 0 && newPublic == 1) {
+                            //Insert into SQL
+                            new SendToSQL(INSERT).execute(JObj);
+                        } else if (oldPublic == 1 && newPublic == 0) {
+                            //Delete from SQL
+                            new SendToSQL(DELETE).execute(JObj);
+                        } else {
+                            //Update SQL
+                            new SendToSQL(UPDATE).execute(JObj);
+                        }
+                        imm.hideSoftInputFromWindow(this.getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                        setResult(RESULT_OK, intent);
+                        finish();
+                    }
                 } else {
-                    //Update SQL
-                    new SendToSQL(UPDATE).execute(JObj);
+                    Toast.makeText(this, getResources().getString(R.string.no_network), Toast.LENGTH_LONG).show();
                 }
-                setResult(RESULT_OK, intent);
-                finish();
                 return true;
             case android.R.id.home:
                 imm.hideSoftInputFromWindow(this.getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);

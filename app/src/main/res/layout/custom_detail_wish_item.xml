@@ -39,7 +39,7 @@
             android:layout_marginLeft="6dp"
             android:text="123"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textColor="#D2D2D2"
+            android:textColor="#AAAAAA"
             android:textSize="11sp" />
 
         <FrameLayout
@@ -52,7 +52,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom|right"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textColor="#D2D2D2"
+                android:textColor="#AAAAAA"
                 android:textSize="11sp" />
         </FrameLayout>
 

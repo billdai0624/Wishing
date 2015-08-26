@@ -1,12 +1,19 @@
 package com.intern.ab.starwish;
 
 import android.app.Dialog;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -15,11 +22,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -33,7 +43,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import static android.view.View.GONE;
 import static android.view.View.OnClickListener;
@@ -42,8 +51,10 @@ import static android.view.View.VISIBLE;
 
 public class DetailBlessingList extends Fragment {
     //static final String ip = "http://10.0.3.2";
-    static final String ip = "http://192.168.0.112";
+    static final String ip = "http://192.168.0.111";
     static final String geoAPI = "AIzaSyC09zMRrsFJhnEX9puE494TYRbsi9tIpAU";
+    static final String admin1 = "administrative_area_level_1";
+    static final String admin2 = "administrative_area_level_2";
     static String device_id;
     private ListView blessingList;
     private DetailBlessingAdapter detailBlessing_adapter;
@@ -56,6 +67,7 @@ public class DetailBlessingList extends Fragment {
     private TextView detailTimeTv;
     private TextView cheeringNumTv;
     private LinearLayout sendBlessing_LL;
+    private CheckBox cheeringIcon;
     private EditText blessingET;
     private ImageButton sendBlessing;
     private String detailWish;
@@ -104,28 +116,81 @@ public class DetailBlessingList extends Fragment {
         detailWishTv = (TextView) rootView.findViewById(R.id.blessing_detailWish);
         detailTimeTv = (TextView) rootView.findViewById(R.id.blessing_detailTime);
         cheeringNumTv = (TextView) rootView.findViewById(R.id.blessing_cheeringNum);
+        cheeringIcon = (CheckBox) rootView.findViewById(R.id.blessing_cheeringIcon);
+        cheeringIcon.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (v.getId() == R.id.blessing_cheeringIcon) {
+                    CheckBox cb = (CheckBox) v;
+                    cb.setChecked(cb.isChecked());
+                    JSONObject JObj = new JSONObject();
+                    try {
+                        if (cb.isChecked()) {
+                            JObj.put("newCheering", Integer.valueOf(cheeringNumTv.getText().toString()) + 1);
+                            JObj.put("cancel", 0);
+                        } else {
+                            JObj.put("newCheering", Integer.valueOf(cheeringNumTv.getText().toString()) - 1);
+                            JObj.put("cancel", 1);
+                        }
+                        JObj.put("_Id", detailWish_id);
+                        JObj.put("device_id", device_id);
+                        new sendCheering().execute(JObj);
+                        cheeringIcon.setEnabled(false);
+                    } catch (JSONException e) {
+                        Log.e("JSONError", e.toString());
+                    }
+                }
+            }
+        });
         sendBlessing_LL = (LinearLayout) rootView.findViewById(R.id.sendBlessing_LL);
         blessingET = (EditText) rootView.findViewById(R.id.blessingET);
         sendBlessing = (ImageButton) rootView.findViewById(R.id.sendBlessing);
         sendBlessing.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    String blessing = blessingET.getText().toString().trim();
-                    if (blessing.equals("")) {
-                        return;
+                if (isConnected()) {
+                    sendBlessing.setEnabled(false);
+                    try {
+                        String blessing = blessingET.getText().toString().trim();
+                        if (blessing.equals("")) {
+                            return;
+                        }
+                        JSONObject JObj = new JSONObject();
+                        JObj.put("blessing", blessing);
+                        JObj.put("id", detailWish_id);
+                        //JObj.put("country", getActivity().getResources().getConfiguration().locale.getDisplayCountry());
+                        JObj.put("device_id", device_id);
+                        JObj.put("time", new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date().getTime()));
+                        new SendBlessingToSQL().execute(JObj);
+                        blessingET.setText("");
+                        ((MainActivity) getActivity()).blessed = true;
+                    } catch (JSONException e) {
+                        Log.e("JSONError", e.toString());
+                    } catch (Exception e) {
+                        Log.e("", e.toString());
+                        sendBlessing.setEnabled(true);
                     }
-                    JSONObject JObj = new JSONObject();
-                    JObj.put("blessing", blessing);
-                    JObj.put("id", detailWish_id);
-                    JObj.put("country", getActivity().getResources().getConfiguration().locale.getDisplayCountry());
-                    JObj.put("device_id", device_id);
-                    JObj.put("time", new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date().getTime()));
-                    new SendBlessingToSQL().execute(JObj);
-                    blessingET.setText("");
-                    ((MainActivity) getActivity()).blessed = true;
-                } catch (JSONException e) {
-                    Log.e("JSONError", e.toString());
+                } else {
+                    dialog = new Dialog(getActivity(), R.style.MyDialog);
+                    dialog.setContentView(R.layout.custom_dialog);
+                    Button cancel = (Button) dialog.findViewById(R.id.cancel_btn);
+                    Button confirm = (Button) dialog.findViewById(R.id.confirm_btn);
+                    TextView question = (TextView) dialog.findViewById(R.id.dialogQuestion);
+                    question.setText(getString(R.string.network_unavailable));
+                    cancel.setOnClickListener(new dialogOnClick());
+                    confirm.setOnClickListener(new dialogOnClick());
+                    dialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
+                        @Override
+                        public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+                            if (keyCode == KeyEvent.KEYCODE_BACK) {
+                                dialog.dismiss();
+                            }
+                            return false;
+                        }
+                    });
+                    dialog.setCancelable(false);
+                    dialog.show();
+                    Toast.makeText(getActivity(), getString(R.string.no_network), Toast.LENGTH_LONG).show();
                 }
                 if (imm.isActive()) {
                     imm.hideSoftInputFromWindow(blessingET.getWindowToken(), 0);
@@ -138,14 +203,6 @@ public class DetailBlessingList extends Fragment {
         items = new ArrayList<DetailBlessing_blessing_item>();
         detailBlessing_adapter = new DetailBlessingAdapter(getActivity(), R.layout.custom_detail_blessing_item, items);
         blessingList.setAdapter(detailBlessing_adapter);
-
-        /*detailWish_blessing_adapter.add(new DetailWish_blessing_item("GOGOGO!!!", image[(int)((Math.random() * 5))]));
-        detailWish_blessing_adapter.add(new DetailWish_blessing_item("GOGOGOQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ!!!", image[(int)(Math.random()*5)]));
-        detailWish_blessing_adapter.add(new DetailWish_blessing_item("GOGOGOQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ!!!", image[(int)(Math.random()*5)]));
-        detailWish_blessing_adapter.add(new DetailWish_blessing_item("GOGOGOQQQQQQQQQQQQQQWQEWQEWQEQWEQQQQQQQQQQQQQQQQQQQQQQQQ!!!", image[(int)(Math.random()*5)]));
-        detailWish_blessing_adapter.add(new DetailWish_blessing_item("GOGOGOQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ!!!", image[(int)(Math.random()*5)]));
-        detailWish_blessing_adapter.add(new DetailWish_blessing_item("GOGOGOQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ!!!", image[(int)(Math.random()*5)]));
-*/
         return rootView;
     }
 
@@ -174,8 +231,9 @@ public class DetailBlessingList extends Fragment {
         detailBlessing_adapter.notifyDataSetChanged();
     }
 
-    public void getWishFromWall(String wish, String time, int cheeringNum, int id, int position) {
+    public void getWishFromWall(String wish, String time, int cheeringNum, int id, int position, boolean cheered) {
         this.position = position;
+        cheeringIcon.setChecked(cheered);
         //getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         blessingET.requestFocus();
 
@@ -200,6 +258,14 @@ public class DetailBlessingList extends Fragment {
         detailBlessing_adapter.notifyDataSetChanged();
     }
 
+    private boolean isConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+        if (networkInfo != null && networkInfo.isConnected()) {
+            return true;
+        }
+        return false;
+    }
     /*public void initDB() {
         dbHelper = new DBHelper(getActivity());
         db = dbHelper.getReadableDatabase();
@@ -245,10 +311,7 @@ public class DetailBlessingList extends Fragment {
         StringBuffer sb = new StringBuffer();
         try {
             // build the URL using the latitude & longitude you want to lookup
-            serverAddress = new URL("https://maps.googleapis.com/maps/api/geocode/json?language="
-                    + new Locale(getActivity().getResources().getConfiguration().locale.getLanguage())
-                    + "&latlng=" + Double.toString(latitude) + "," + Double.toString(longitude)
-                    + "&key=" + geoAPI);
+            serverAddress = new URL("https://maps.googleapis.com/maps/api/geocode/json?language=en&latlng=" + Double.toString(latitude) + "," + Double.toString(longitude) + "&key=" + geoAPI);
             // Set up the initial connection
             connection = (HttpURLConnection) serverAddress.openConnection();
             connection.setRequestMethod("GET");
@@ -310,6 +373,21 @@ public class DetailBlessingList extends Fragment {
         }
     }
 
+    class dialogOnClick implements View.OnClickListener {
+        @Override
+        public void onClick(View v) {
+            if (v.getId() == R.id.cancel_btn) {
+                dialog.dismiss();
+            } else if (v.getId() == R.id.confirm_btn) {
+                Intent intent = new Intent("/");
+                ComponentName cn = new ComponentName("com.android.settings", "com.android.settings.WirelessSettings");
+                intent.setComponent(cn);
+                intent.setAction("android.intent.action.VIEW");
+                startActivity(intent);
+            }
+        }
+    }
+
     class GetBlessingFromSQL extends AsyncTask<JSONObject, Void, String> {
         public GetBlessingFromSQL() {
 
@@ -356,6 +434,7 @@ public class DetailBlessingList extends Fragment {
         @Override
         protected String doInBackground(JSONObject... params) {
             String city = "";
+            String country = "";
             JSONObject ret = getLocationName();
             JSONObject locationName;
             try {
@@ -364,16 +443,22 @@ public class DetailBlessingList extends Fragment {
                     JSONArray array1 = array.getJSONObject(i).getJSONArray("address_components");
                     for (int k = array1.length() - 1; k >= 0; k--) {
                         locationName = array1.getJSONObject(k);
-                        if (locationName.getJSONArray("types").getString(0).equals("locality")) {
+                        if (country.equals("") && locationName.getJSONArray("types").getString(0).equals("country")) {
+                            country = locationName.getString("long_name");
+                        }
+                        if (city.equals("") && ((locationName.getJSONArray("types").getString(0).equals("locality"))
+                                || locationName.getJSONArray("types").getString(0).equals(admin1)
+                                || locationName.getJSONArray("types").getString(0).equals(admin2))) {
                             city = locationName.getString("long_name");
                             break;
                         }
                     }
-                    if (!city.equals("")) {
+                    if (!city.equals("") && !country.equals("")) {
                         break;
                     }
                 }
                 params[0].put("city", city);
+                params[0].put("country", country);
             } catch (JSONException e) {
                 Log.e("JSONError", e.toString());
             }
@@ -384,6 +469,7 @@ public class DetailBlessingList extends Fragment {
 
         @Override
         protected void onPostExecute(String jsonString) {
+            sendBlessing.setEnabled(true);
             items.clear();
             try {
                 JSONArray JArray = new JSONArray(jsonString);
@@ -403,6 +489,29 @@ public class DetailBlessingList extends Fragment {
                 Log.e("JSONError", e.toString());
             }
             ((MainActivity) getActivity()).blessed = true;
+        }
+    }
+
+    class sendCheering extends AsyncTask<JSONObject, Void, String> {
+        @Override
+        protected String doInBackground(JSONObject... params) {
+            JSONParser jsonParser = new JSONParser();
+            String JSONString = jsonParser.makeHttpRequest(ip + "/cheering.php", params[0]);
+            return JSONString;
+        }
+
+        @Override
+        protected void onPostExecute(String JSONString) {
+            try {
+                JSONArray JArray = new JSONArray(JSONString);
+                JSONObject JObj = JArray.getJSONObject(0);
+                cheeringNumTv.setText(Integer.toString(JObj.getInt("cheering")));
+                ((MainActivity) getActivity()).alterCheeringState(cheeringIcon.isChecked(), position);
+
+            } catch (JSONException e) {
+                Log.e("JSONError", e.toString());
+            }
+            cheeringIcon.setEnabled(true);
         }
     }
 }

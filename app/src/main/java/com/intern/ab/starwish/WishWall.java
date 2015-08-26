@@ -10,6 +10,8 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -40,7 +42,7 @@ import static android.widget.AbsListView.OnScrollListener;
 
 public class WishWall extends Fragment implements LocationListener {
     //static final String ip = "http://10.0.3.2";
-    static final String ip = "http://192.168.0.112";
+    static final String ip = "http://192.168.0.111";
     static final int HOT = 0;
     static final int NEW = 1;
     static final int NEAR = 2;
@@ -132,8 +134,7 @@ public class WishWall extends Fragment implements LocationListener {
                 publicWish_list.addFooterView(footer);
                 switch (checkedId) {
                     case R.id.hot:
-                        lowerBound = 0;
-                        cheeringSorted();
+
                         publicWish_list.setSelection(0);
                         hot.setCompoundDrawablesWithIntrinsicBounds(null, null, null, img);
                         hot.setTextColor(pressed_color);
@@ -141,10 +142,14 @@ public class WishWall extends Fragment implements LocationListener {
                         near.setTextColor(Color.WHITE);
                         newest.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
                         newest.setTextColor(Color.WHITE);
+                        if (isConnected()) {
+                            lowerBound = 0;
+                            cheeringSorted();
+                        } else {
+                            Toast.makeText(getActivity(), getString(R.string.no_network), Toast.LENGTH_LONG).show();
+                        }
                         break;
                     case R.id.newest:
-                        lastData_id = -1;
-                        timeSorted();
                         publicWish_list.setSelection(0);
                         newest.setCompoundDrawablesWithIntrinsicBounds(null, null, null, img);
                         newest.setTextColor(pressed_color);
@@ -152,9 +157,14 @@ public class WishWall extends Fragment implements LocationListener {
                         hot.setTextColor(Color.WHITE);
                         near.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
                         near.setTextColor(Color.WHITE);
+                        if (isConnected()) {
+                            lastData_id = -1;
+                            timeSorted();
+                        } else {
+                            Toast.makeText(getActivity(), getString(R.string.no_network), Toast.LENGTH_LONG).show();
+                        }
                         break;
                     case R.id.near:
-                        distanceSorted();
                         publicWish_list.setSelection(0);
                         near.setCompoundDrawablesWithIntrinsicBounds(null, null, null, img);
                         near.setTextColor(pressed_color);
@@ -162,6 +172,11 @@ public class WishWall extends Fragment implements LocationListener {
                         newest.setTextColor(Color.WHITE);
                         hot.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
                         hot.setTextColor(Color.WHITE);
+                        if (isConnected()) {
+                            distanceSorted();
+                        } else {
+                            Toast.makeText(getActivity(), getString(R.string.no_network), Toast.LENGTH_LONG).show();
+                        }
                         break;
                     default:
                 }
@@ -184,17 +199,24 @@ public class WishWall extends Fragment implements LocationListener {
                         publicWish_list.setSelection(1);//不管更不更新，都移到第一項
                     }*/
                     if (shouldLoadData && !isLoadingData) {
-                        if (hot.isChecked()) {
-                            lowerBound += 20;
-                            cheeringSorted();
-                        } else if (newest.isChecked()) {
-                            lastData_id = items.get(items.size() - 1).getWish_id();
-                            timeSorted();
-                        } else if (near.isChecked()) {
-                            distanceSorted();
-                        }
                         loadingAnim.start();
-                        //RunAnim runAnim=new RunAnim();
+                        if (isConnected()) {
+                            if (hot.isChecked()) {
+                                lowerBound += 20;
+                                cheeringSorted();
+                            } else if (newest.isChecked()) {
+                                if (!items.isEmpty()) {
+                                    lastData_id = items.get(items.size() - 1).getWish_id();
+                                    timeSorted();
+                                }
+                            } else if (near.isChecked()) {
+                                distanceSorted();
+                            }
+
+                            //RunAnim runAnim=new RunAnim();
+                        } else {
+                            Toast.makeText(getActivity(), getString(R.string.no_network), Toast.LENGTH_LONG).show();
+                        }
                     }
                     /*else{
                         loadingAnim.stop();
@@ -233,6 +255,10 @@ public class WishWall extends Fragment implements LocationListener {
 
     }
 
+    public void alterCheeringState(boolean cheered, int position) {
+        publicWishItemAdapter.alterCheeredState(cheered, position);
+    }
+
     public void alterBlessingState(boolean blessed, int position) {
         publicWishItemAdapter.alterBlessedState(blessed, position);
     }
@@ -243,6 +269,7 @@ public class WishWall extends Fragment implements LocationListener {
     }
 
     public void timeSorted() {
+        loadingAnim.start();
         JObj = new JSONObject();
         try {
             JObj.put("lastData_id", lastData_id);
@@ -256,6 +283,7 @@ public class WishWall extends Fragment implements LocationListener {
     }
 
     public void cheeringSorted() {
+        loadingAnim.start();
         JObj = new JSONObject();
         try {
             JObj.put("lowerBound", lowerBound);
@@ -269,6 +297,7 @@ public class WishWall extends Fragment implements LocationListener {
     }
 
     public void distanceSorted() {
+        loadingAnim.start();
         JObj = new JSONObject();
         try {
             JObj.put("longitude", longitude);
@@ -311,15 +340,26 @@ public class WishWall extends Fragment implements LocationListener {
             latitude = location.getLatitude();
         } else {
             cursor = db.rawQuery("SELECT longitude, latitude FROM wish ORDER BY _Id ASC LIMIT 1", null);
-            cursor.moveToNext();
-            if (cursor.getDouble(0) != 0 && cursor.getDouble(1) != 0) {
-                longitude = cursor.getDouble(0);
-                latitude = cursor.getDouble(1);
+            if (cursor.moveToNext()) {
+                if (cursor.getDouble(0) != 0 && cursor.getDouble(1) != 0) {
+                    longitude = cursor.getDouble(0);
+                    latitude = cursor.getDouble(1);
+                }
             } else {
                 Toast.makeText(getActivity(), "Your location is unavailable", Toast.LENGTH_LONG).show();
             }
+
             cursor.close();
         }
+    }
+
+    private boolean isConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+        if (networkInfo != null && networkInfo.isConnected()) {
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -357,7 +397,40 @@ public class WishWall extends Fragment implements LocationListener {
                 Toast.makeText(getActivity(), "Please activate GPS Service to update your location", Toast.LENGTH_SHORT).show();
             }
             if (items.isEmpty()) {
-                timeSorted();
+                loadingAnim.start();
+                if (isConnected()) {
+                    timeSorted();
+                } else {
+                    Toast.makeText(getActivity(), getString(R.string.no_network), Toast.LENGTH_LONG).show();
+                }
+            }
+            if (((MainActivity) getActivity()).shouldRefresh) {
+                if (isConnected()) {
+                    items.clear();
+                    publicWishItemAdapter.clearStates();
+                    footer.setVisibility(View.VISIBLE);
+                    publicWish_list.removeFooterView(footer);
+                    publicWish_list.addFooterView(footer);
+                    switch (category.getCheckedRadioButtonId()) {
+                        case R.id.hot:
+                            lowerBound = 0;
+                            cheeringSorted();
+                            publicWish_list.setSelection(0);
+                            break;
+                        case R.id.newest:
+                            lastData_id = -1;
+                            timeSorted();
+                            publicWish_list.setSelection(0);
+                            break;
+                        case R.id.near:
+                            distanceSorted();
+                            publicWish_list.setSelection(0);
+                            break;
+                    }
+                    ((MainActivity) getActivity()).shouldRefresh = false;
+                } else {
+                    Toast.makeText(getActivity(), getString(R.string.no_network), Toast.LENGTH_SHORT).show();
+                }
             }
         } else {
             if (lm != null) {
@@ -397,80 +470,86 @@ public class WishWall extends Fragment implements LocationListener {
         @Override
         protected void onPostExecute(String JSONString) {
             super.onPostExecute(JSONString);
-            loadingAnim.stop();
-            if (mode == NEAR && items.size() != 0) {
-                items.clear();
-                publicWishItemAdapter.clearStates();
-            }
-            try {
-                JSONArray JArray = new JSONArray(JSONString);
-                if (JArray.length() == 0) {
-                    footer.setVisibility(View.GONE);
-                    publicWish_list.removeFooterView(footer);
+            if (JSONString.equals("Fail")) {
+                Toast.makeText(getActivity(), getString(R.string.unstable_network), Toast.LENGTH_LONG).show();
+                JSONString = "";
+            } else {
+                if (mode == NEAR && items.size() != 0) {
+                    items.clear();
+                    publicWishItemAdapter.clearStates();
                 }
-                for (int i = 0; i < JArray.length(); i++) {
-                    JSONObject JObj = JArray.getJSONObject(i);
-                    String time = JObj.getString("time");
-                    String distance = "";
-                    switch (JObj.getInt("timeUnit")) {
-                        case MIN:
-                            if (time.equals("1")) {
-                                time = time + " minute ago";
-                            } else {
-                                time = time + " minutes ago";
-                            }
-                            break;
-                        case HOUR:
-                            if (time.equals("1")) {
-                                time = time + " hour ago";
-                            } else {
-                                time = time + " hours ago";
-                            }
-                            break;
-                        case DAY:
-                            if (time.equals("1")) {
-                                time = time + " day ago";
-                            } else {
-                                time = time + " days ago";
-                            }
-                            break;
-                        case MONTH:
-                            if (time.equals("1")) {
-                                time = time + " month ago";
-                            } else {
-                                time = time + " months ago";
-                            }
-                            break;
-                        case YEAR:
-                            if (time.equals("1")) {
-                                time = time + " year ago";
-                            } else {
-                                time = time + " years ago";
-                            }
-                            break;
-                        default:
+                try {
+                    JSONArray JArray = new JSONArray(JSONString);
+                    if (JArray.length() == 0) {
+                        footer.setVisibility(View.GONE);
+                        publicWish_list.removeFooterView(footer);
                     }
-                    if (mode == NEAR) {
-                        distance = JObj.getString("distance");
-                        if (JObj.getInt("distanceUnit") == 1) {
-                            distance = distance + "m";
-                        } else {
-                            distance = distance + "km";
+                    for (int i = 0; i < JArray.length(); i++) {
+                        JSONObject JObj = JArray.getJSONObject(i);
+                        String time = JObj.getString("time");
+                        String distance = "";
+                        switch (JObj.getInt("timeUnit")) {
+                            case MIN:
+                                if (time.equals("1")) {
+                                    time = time + " minute ago";
+                                } else {
+                                    time = time + " minutes ago";
+                                }
+                                break;
+                            case HOUR:
+                                if (time.equals("1")) {
+                                    time = time + " hour ago";
+                                } else {
+                                    time = time + " hours ago";
+                                }
+                                break;
+                            case DAY:
+                                if (time.equals("1")) {
+                                    time = time + " day ago";
+                                } else {
+                                    time = time + " days ago";
+                                }
+                                break;
+                            case MONTH:
+                                if (time.equals("1")) {
+                                    time = time + " month ago";
+                                } else {
+                                    time = time + " months ago";
+                                }
+                                break;
+                            case YEAR:
+                                if (time.equals("1")) {
+                                    time = time + " year ago";
+                                } else {
+                                    time = time + " years ago";
+                                }
+                                break;
+                            default:
                         }
-                        publicWishItemAdapter.setDistanceVisible(true);
+                        if (mode == NEAR) {
+                            distance = JObj.getString("distance");
+                            if (JObj.getInt("distanceUnit") == 1) {
+                                distance = distance + "m";
+                            } else {
+                                distance = distance + "km";
+                            }
+                            publicWishItemAdapter.setDistanceVisible(true);
+                        }
+                        publicWishItemAdapter.setCheered(JObj.getInt("cheered"));
+                        publicWishItemAdapter.setBlessed(JObj.getInt("blessed"));
+                        items.add(new PublicWish_item(JObj.getString("wish"), distance, time, JObj.getInt("cheering"), JObj.getString("country"), JObj.getString("city")));
+                        items.get(items.size() - 1).setWish_id(JObj.getInt("wish_id"));
+                        items.get(items.size() - 1).setOriginalTime(JObj.getString("originalTime"));
                     }
-                    publicWishItemAdapter.setChecked(JObj.getInt("cheered"));
-                    publicWishItemAdapter.setBlessed(JObj.getInt("blessed"));
-                    items.add(new PublicWish_item(JObj.getString("wish"), distance, time, JObj.getInt("cheering"), JObj.getString("country"), JObj.getString("city")));
-                    items.get(items.size() - 1).setWish_id(JObj.getInt("wish_id"));
-                    items.get(items.size() - 1).setOriginalTime(JObj.getString("originalTime"));
+                    publicWishItemAdapter.notifyDataSetChanged();
+                    loadingAnim.stop();
+                    if (mode == NEAR) {
+                        publicWish_list.setSelection(0);
+                    }
+                } catch (JSONException e) {
+                    Log.e("JSONError", e.toString());
+                    //Toast.makeText(getActivity(), getString(R.string.no_network), Toast.LENGTH_LONG).show();
                 }
-                publicWishItemAdapter.notifyDataSetChanged();
-                if (mode == NEAR) {
-                    publicWish_list.setSelection(0);
-                }
-            } catch (JSONException e) {
-                Log.e("JSONError", e.toString());
             }
         }
     }

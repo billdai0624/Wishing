@@ -2,7 +2,6 @@ package com.intern.ab.starwish;
 
 import android.util.Log;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -24,7 +23,7 @@ public class JSONParser {
     }
 
     // getJSONFromUrl方法為單存取資料用
-    public JSONObject getJSONFromUrl(String destination) {
+    /*public JSONObject getJSONFromUrl(String destination) {
         HttpURLConnection conn = null;
         // Making HTTP request
         try {
@@ -33,8 +32,8 @@ public class JSONParser {
             conn = (HttpURLConnection) url.openConnection();
             //===============================
             //下面註解兩行可有可無
-            //conn.setReadTimeout(10000);
-            //conn.setConnectTimeout(15000);
+            conn.setReadTimeout(10000);
+            conn.setConnectTimeout(15000);
             //===============================
             conn.setRequestMethod("POST");
             conn.setDoInput(true);
@@ -63,10 +62,11 @@ public class JSONParser {
             Log.e("JSON Parser", "getJSONFromUrl Error parsing data " + e.toString());
         }
         return jObj;
-    }
+    }*/
 
     public String makeHttpRequest(String destination, JSONObject JObj) {
         HttpURLConnection conn = null;
+        json = "";
         try {
             // 建立連線
             URL url = new URL(destination);
@@ -77,6 +77,8 @@ public class JSONParser {
             conn.setUseCaches(false);
             conn.setDoInput(true);
             conn.setDoOutput(true);
+            conn.setReadTimeout(30000);
+            conn.setConnectTimeout(30000);
 
             //Send request
             OutputStreamWriter writer = new OutputStreamWriter(conn.getOutputStream());
@@ -94,7 +96,8 @@ public class JSONParser {
             reader.close();
             json = sb.toString();
         } catch (Exception e) {
-            System.out.println("makeHttpRequest Error:" + e.toString());
+            json = "Fail";
+            Log.e("makeHttpRequest Error:", e.toString());
         } finally {
             if (conn != null) {
                 conn.disconnect();

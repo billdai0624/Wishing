@@ -37,7 +37,8 @@
                 android:layout_marginTop="11dp"
                 android:minWidth="86dp"
                 android:text="213"
-                android:textColor="#FFFFFF" />
+                android:textColor="#FFFFFF"
+                android:textSize="17sp" />
 
             <LinearLayout
                 android:layout_width="wrap_content"

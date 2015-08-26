@@ -48,11 +48,12 @@ public class MainActivity extends AppCompatActivity {
     public static final String EXTRA_MESSAGE = "message";
     public static final String REG_ID = "registration_id";
     //static final String ip = "http://10.0.3.2";
-    static final String ip = "http://192.168.0.112";
+    static final String ip = "http://192.168.0.111";
     private static final String TAG = "GCM :";
     private static final String APP_VERSION = "appVersion";
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     public static String device_id;
+    public boolean shouldRefresh;
     DBHelper dbHelper;
     SQLiteDatabase db;
     ActionBar actionBar;
@@ -223,11 +224,11 @@ public class MainActivity extends AppCompatActivity {
         viewPager.setCurrentItem(4, false);
     }
 
-    public void toDetailBlessingFromWall(String wish, String time, int cheeringNum, int id, int position) {
+    public void toDetailBlessingFromWall(String wish, String time, int cheeringNum, int id, int position, boolean cheered) {
         DetailBlessingList f = (DetailBlessingList) fm.getFragments().get(4);
         tabsGroup.setVisibility(View.GONE);
         makeWish.setVisibility(View.GONE);
-        f.getWishFromWall(wish, time, cheeringNum, id, position);
+        f.getWishFromWall(wish, time, cheeringNum, id, position, cheered);
         if (saveToHistory) {
             pageHistory.clear();
             pageHistory.push(2);
@@ -296,6 +297,11 @@ public class MainActivity extends AppCompatActivity {
         editor.putString(REG_ID, regId);
         editor.putInt(APP_VERSION, appVersion);
         editor.commit();
+    }
+
+    public void alterCheeringState(boolean checked, int position) {
+        WishWall f = (WishWall) fm.getFragments().get(2);
+        f.alterCheeringState(checked, position);
     }
 
     private String getRegistrationId(Context context) {
@@ -372,6 +378,7 @@ public class MainActivity extends AppCompatActivity {
                 wishList.setChecked(true);
                 WishList f = (WishList) fm.getFragments().get(0);
                 f.update(data.getExtras());
+                shouldRefresh = true;
             }
         }
     }

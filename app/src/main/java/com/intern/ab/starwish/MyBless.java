@@ -23,7 +23,7 @@ import java.util.ArrayList;
 
 public class MyBless extends Fragment {
     //static final String ip = "http://10.0.3.2";
-    static final String ip = "http://192.168.0.112";
+    static final String ip = "http://192.168.0.111";
     static String device_id;
     private ArrayList<Blessing_item> blessing_items;
     private BlessingAdapter blessingAdapter;

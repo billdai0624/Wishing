@@ -24,7 +24,7 @@ import static android.view.View.VISIBLE;
 
 public class PublicWishAdapter extends ArrayAdapter<PublicWish_item> {
     //static final String ip = "http://10.0.3.2";
-    static final String ip = "http://192.168.0.112";
+    static final String ip = "http://192.168.0.111";
     static String device_id;
     public ViewHolder holder;
     private int layoutRes;
@@ -105,6 +105,7 @@ public class PublicWishAdapter extends ArrayAdapter<PublicWish_item> {
                     JObj.put("_Id", item.getWish_id());
                     JObj.put("device_id", device_id);
                     new sendCheering(item).execute(JObj);
+                    holder.cheering.setEnabled(false);
                 } catch (JSONException e) {
                     Log.e("JSONError", e.toString());
                 }
@@ -117,7 +118,8 @@ public class PublicWishAdapter extends ArrayAdapter<PublicWish_item> {
                 cb.setChecked(true);
                 blessingCheckedState.set(position, true);
                 ((MainActivity) getContext()).detailBlessingItemPosition = position;
-                ((MainActivity) getContext()).toDetailBlessingFromWall(item.getWish(), item.getOriginalTime(), item.getCheeringNum(), item.getWish_id(), position);
+                ((MainActivity) getContext()).toDetailBlessingFromWall(item.getWish(), item.getOriginalTime(),
+                        item.getCheeringNum(), item.getWish_id(), position, cheeringCheckedState.get(position));
             }
         });
         return convertView;
@@ -127,12 +129,22 @@ public class PublicWishAdapter extends ArrayAdapter<PublicWish_item> {
         this.isDistance = isDistance;
     }
 
-    public void setChecked(int checked) {
-        cheeringCheckedState.add((checked == 1));
+    public void setCheered(int cheered) {
+        cheeringCheckedState.add((cheered == 1));
     }
 
     public void setBlessed(int blessed) {
         blessingCheckedState.add((blessed == 1));
+    }
+
+    public void alterCheeredState(boolean cheered, int position) {
+        cheeringCheckedState.set(position, cheered);
+        if (cheered) {
+            getItem(position).setCheeringNum(getItem(position).getCheeringNum() + 1);
+        } else {
+            getItem(position).setCheeringNum(getItem(position).getCheeringNum() - 1);
+        }
+        notifyDataSetChanged();
     }
 
     public void alterBlessedState(boolean blessed, int position) {
@@ -206,9 +218,11 @@ public class PublicWishAdapter extends ArrayAdapter<PublicWish_item> {
                 JSONObject JObj = JArray.getJSONObject(0);
                 item.setCheeringNum(JObj.getInt("cheering"));
                 notifyDataSetChanged();
+
             } catch (JSONException e) {
                 Log.e("JSONError", e.toString());
             }
+            holder.cheering.setEnabled(true);
         }
     }
 }

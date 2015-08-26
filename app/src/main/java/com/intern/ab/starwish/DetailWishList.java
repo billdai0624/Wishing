@@ -31,7 +31,7 @@ import java.util.List;
 
 public class DetailWishList extends Fragment {
     //static final String ip = "http://10.0.3.2";
-    static final String ip = "http://192.168.0.112";
+    static final String ip = "http://192.168.0.111";
     static final int DELETE = 0;
     static final int QUERY = 1;
     static String device_id;
@@ -47,6 +47,7 @@ public class DetailWishList extends Fragment {
     private TextView cheeringNumTv;
     private String detailWish;
     private String detailTime;
+    private boolean detailPublic;
     private int cheeringNum;
     private String detailWish_id;
     private int[] image;
@@ -99,6 +100,7 @@ public class DetailWishList extends Fragment {
                 Intent intent = new Intent();
                 intent.putExtra("detailWish", detailWish);
                 intent.putExtra("detailWish_id", detailWish_id);
+                intent.putExtra("detailPublic", detailPublic);
                 intent.setClass(getActivity(), EditWish.class);
                 startActivityForResult(intent, 1);
                 return true;
@@ -139,6 +141,7 @@ public class DetailWishList extends Fragment {
             //   wishData = getArguments();
             detailWish = b.getString("detailWish");
             detailTime = b.getString("detailTime");
+            detailPublic = b.getBoolean("Public");
             //cheeringNum = prevWish.getString("cheeringNum");
         }
         initDB();
@@ -188,6 +191,7 @@ public class DetailWishList extends Fragment {
             detailTimeTv.setText(cursor.getString(1));
             //cheeringNumTv.setText(Integer.toString(cursor.getInt(2)));
             cursor.close();
+            ((MainActivity) getActivity()).shouldRefresh = true;
             ((MainActivity) getActivity()).updateEditWish(detailWish_id);
         }
     }
@@ -205,6 +209,8 @@ public class DetailWishList extends Fragment {
                 Log.e("JSONError", e.toString());
             }
         } else if (isInit && !isVisibleToUser) {
+            items.clear();
+            detailWish_blessing_adapter.notifyDataSetChanged();
             ((MainActivity) getActivity()).pageHistory.clear();
         }
     }
@@ -231,6 +237,7 @@ public class DetailWishList extends Fragment {
                 dialog.dismiss();
                 WishList f = (WishList) ((MainActivity) getActivity()).fm.getFragments().get(0);
                 f.deleteFromDetail(detailWish_id);
+                ((MainActivity) getActivity()).shouldRefresh = true;
                 ((MainActivity) getActivity()).onBackPressed();
             }
         }
