@@ -42,7 +42,7 @@
                 android:layout_marginLeft="15dp"
                 android:layout_marginRight="15dp"
                 android:layout_marginTop="11dp"
-                android:minWidth="86dp"
+                android:minWidth="100dp"
                 android:text="123"
                 android:textColor="#FFFFFF"
                 android:textSize="17sp" />

@@ -27,11 +27,13 @@
         android:layout_marginTop="11dp"
         android:orientation="horizontal">
 
-        <ImageView
+        <CheckBox
             android:id="@+id/cheeringIcon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/btn_good_pressed" />
+            android:button="@null"
+            android:checked="false"
+            android:background="@drawable/cheering_selector" />
 
         <TextView
             android:id="@+id/cheeringNum"

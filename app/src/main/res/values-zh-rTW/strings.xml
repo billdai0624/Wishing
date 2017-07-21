@@ -2,6 +2,7 @@
 <resources>
     <string name="app_name">Wishing</string>
     <string name="no_network">請檢查網路連接後再重試</string>
+    <string name="unstable_network">網路訊號不穩定，請稍後再重試</string>
     <string name="allowPublic">秀出您的願望</string>
     <string name="wish_title">Make a wish</string>
     <string name="selectAll">選擇全部</string>

@@ -2,10 +2,13 @@ package com.intern.ab.starwish;
 
 import android.app.Dialog;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -18,8 +21,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -45,6 +50,7 @@ public class DetailWishList extends Fragment {
     private TextView detailWishTv;
     private TextView detailTimeTv;
     private TextView cheeringNumTv;
+    private CheckBox cheering_icon;
     private String detailWish;
     private String detailTime;
     private boolean detailPublic;
@@ -118,6 +124,34 @@ public class DetailWishList extends Fragment {
         detailWishTv = (TextView) rootView.findViewById(R.id.detailWish);
         detailTimeTv = (TextView) rootView.findViewById(R.id.detailTime);
         cheeringNumTv = (TextView) rootView.findViewById(R.id.cheeringNum);
+        cheering_icon = (CheckBox) rootView.findViewById(R.id.cheeringIcon);
+        cheering_icon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CheckBox cb = (CheckBox) v;
+                if (isConnected()) {
+                    JSONObject JObj = new JSONObject();
+                    try {
+                        cheering_icon.setEnabled(false);
+                        if (cb.isChecked()) {
+                            JObj.put("newCheering", Integer.valueOf(cheeringNumTv.getText().toString()) + 1);
+                            JObj.put("cancel", 0);
+                        } else {
+                            JObj.put("newCheering", Integer.valueOf(cheeringNumTv.getText().toString()) - 1);
+                            JObj.put("cancel", 1);
+                        }
+                        JObj.put("SQLite_id", detailWish_id);
+                        JObj.put("device_id", device_id);
+                        new sendCheering().execute(JObj);
+                    } catch (JSONException e) {
+                        Log.e("JSONError", e.toString());
+                    }
+                } else {
+                    Toast.makeText(getActivity(), getString(R.string.no_network), Toast.LENGTH_SHORT).show();
+                    cb.setChecked(!cb.isChecked());
+                }
+            }
+        });
         blessingList = (ListView) rootView.findViewById(R.id.detailWishList);
         items = new ArrayList<DetailWish_blessing_item>();
         detailWish_blessing_adapter = new DetailWish_blessing_adapter(getActivity(), R.layout.custom_detail_wish_blessing_item, items);
@@ -152,7 +186,7 @@ public class DetailWishList extends Fragment {
         cursor.moveToNext();
         detailWishTv.setText(detailWish);
         detailTimeTv.setText(detailTime);
-        cheeringNumTv.setText(Integer.toString(cursor.getInt(0)));
+        //cheeringNumTv.setText(Integer.toString(cursor.getInt(0)));
         cursor.close();
         detailWish_blessing_adapter.notifyDataSetChanged();
     }
@@ -169,6 +203,15 @@ public class DetailWishList extends Fragment {
     public void initDB() {
         dbHelper = new DBHelper(getActivity());
         db = dbHelper.getReadableDatabase();
+    }
+
+    private boolean isConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+        if (networkInfo != null && networkInfo.isConnected()) {
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -200,13 +243,18 @@ public class DetailWishList extends Fragment {
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
         if (isInit && isVisibleToUser) {
-            try {
-                JSONObject JObj = new JSONObject();
-                JObj.put("SQLite_id", detailWish_id);
-                JObj.put("device_id", device_id);
-                new ActionToSQL(QUERY).execute(JObj);
-            } catch (JSONException e) {
-                Log.e("JSONError", e.toString());
+            cheering_icon.setEnabled(true);
+            if (isConnected()) {
+                try {
+                    JSONObject JObj = new JSONObject();
+                    JObj.put("SQLite_id", detailWish_id);
+                    JObj.put("device_id", device_id);
+                    new ActionToSQL(QUERY).execute(JObj);
+                } catch (JSONException e) {
+                    Log.e("JSONError", e.toString());
+                }
+            } else {
+                Toast.makeText(getActivity(), getString(R.string.no_network), Toast.LENGTH_SHORT).show();
             }
         } else if (isInit && !isVisibleToUser) {
             items.clear();
@@ -263,24 +311,60 @@ public class DetailWishList extends Fragment {
         }
 
         @Override
-        protected void onPostExecute(String jsonString) {
-            if (mode == QUERY) {
+        protected void onPostExecute(String JSONString) {
+            if (JSONString.equals("Fail")) {
+                Toast.makeText(getActivity(), getString(R.string.unstable_network), Toast.LENGTH_SHORT).show();
+                JSONString = "";
+            } else {
+                if (mode == QUERY) {
+                    try {
+                        JSONArray JArray = new JSONArray(JSONString);
+                        JSONObject JObj = JArray.getJSONObject(0);
+                        cheeringNumTv.setText(Integer.toString(JObj.getInt("cheering")));
+                        boolean k = (JObj.getInt("self_cheered") == 1);
+                        cheering_icon.setChecked(k);
+                        ContentValues contentValues = new ContentValues();
+                        contentValues.put("Cheering", JObj.getInt("cheering"));
+                        db.update("wish", contentValues, "_Id=?", new String[]{detailWish_id});
+                        if(JObj.getString("blessing").equals("null")){
+                            return;
+                        }
+                        for (int i = 0; i < JArray.length(); i++) {
+                            JObj = JArray.getJSONObject(i);
+                            String city = JObj.getString("city");
+                            if (!city.equals("")) {
+                                city = city + ", ";
+                            }
+                            items.add(new DetailWish_blessing_item(JObj.getString("blessing"), city + JObj.getString("country"), JObj.getString("time"), image[(int) ((Math.random() * 5))]));
+                        }
+                        detailWish_blessing_adapter.notifyDataSetChanged();
+                    } catch (JSONException e) {
+                        Log.e("JSONError", e.toString());
+                    }
+                }
+            }
+        }
+    }
+
+    class sendCheering extends AsyncTask<JSONObject, Void, String> {
+        @Override
+        protected String doInBackground(JSONObject... params) {
+            JSONParser jsonParser = new JSONParser();
+            String JSONString = jsonParser.makeHttpRequest(ip + "/cheering.php", params[0]);
+            return JSONString;
+        }
+
+        @Override
+        protected void onPostExecute(String JSONString) {
+            cheering_icon.setEnabled(true);
+            if (JSONString.equals("Fail")) {
+                Toast.makeText(getActivity(), getString(R.string.unstable_network), Toast.LENGTH_SHORT).show();
+                JSONString = "";
+            } else {
                 try {
-                    JSONArray JArray = new JSONArray(jsonString);
+                    JSONArray JArray = new JSONArray(JSONString);
                     JSONObject JObj = JArray.getJSONObject(0);
                     cheeringNumTv.setText(Integer.toString(JObj.getInt("cheering")));
-                    ContentValues contentValues = new ContentValues();
-                    contentValues.put("Cheering", JObj.getInt("cheering"));
-                    db.update("wish", contentValues, "_Id=?", new String[]{detailWish_id});
-                    for (int i = 0; i < JArray.length(); i++) {
-                        JObj = JArray.getJSONObject(i);
-                        String city = JObj.getString("city");
-                        if (!city.equals("")) {
-                            city = city + ", ";
-                        }
-                        items.add(new DetailWish_blessing_item(JObj.getString("blessing"), city + JObj.getString("country"), JObj.getString("time"), image[(int) ((Math.random() * 5))]));
-                    }
-                    detailWish_blessing_adapter.notifyDataSetChanged();
                 } catch (JSONException e) {
                     Log.e("JSONError", e.toString());
                 }

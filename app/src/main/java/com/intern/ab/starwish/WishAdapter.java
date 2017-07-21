@@ -98,6 +98,7 @@ public class WishAdapter extends ArrayAdapter<Wish_item> {
         b.putString("detailTime", getItem(position).getTime());
         b.putInt("recNo", getItem(position).getRecNo());
         b.putBoolean("Public", getItem(position).isPublic());
+        b.putInt("SQLite_id", getItem(position).getId());
         //((MainActivity) getContext()).setBundle(b);
         ((MainActivity) getContext()).toDetailWish(position, b);
     }
@@ -128,6 +129,7 @@ public class WishAdapter extends ArrayAdapter<Wish_item> {
 
         @Override
         public void onClick(View v) {
+            CheckBox cb = (CheckBox)v;
             if (isConnected()) {
                 if (!getItem(position).isRealized()) {
                     dialog = new Dialog(getContext(), R.style.MyDialog);
@@ -170,7 +172,8 @@ public class WishAdapter extends ArrayAdapter<Wish_item> {
                     db.update("wish", contentValues, "_Id=?", new String[]{Integer.toString(getItem(position).getId())});
                 }
             } else {
-                Toast.makeText(getContext(), getContext().getResources().getString(R.string.no_network), Toast.LENGTH_LONG).show();
+                cb.setChecked(false);
+                Toast.makeText(getContext(), getContext().getResources().getString(R.string.no_network), Toast.LENGTH_SHORT).show();
             }
                 /*AlertDialog.Builder ask_realized = new AlertDialog.Builder(getContext());
                 ask_realized.setTitle(R.string.realized_title)

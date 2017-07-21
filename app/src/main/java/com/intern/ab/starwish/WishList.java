@@ -98,7 +98,7 @@ public class WishList extends Fragment {
             selectedNumTv.setText("(0)");
             changeMode();*/
             if (!isConnected()) {
-                Toast.makeText(getActivity(), getString(R.string.no_network), Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), getString(R.string.no_network), Toast.LENGTH_SHORT).show();
             } else if (selectedNum == 0) {
                 Toast.makeText(getActivity(), getString(R.string.multiDelete_hint), Toast.LENGTH_SHORT).show();
             } else {
@@ -159,7 +159,7 @@ public class WishList extends Fragment {
         items = new ArrayList<Wish_item>();
 
         cursor = db.rawQuery("SELECT _Id, Wish, DateTime, Realized, Public, rowid " +
-                "FROM wish ORDER BY DateTime DESC", null);
+                "FROM wish ORDER BY rowid DESC", null);
         while (cursor.moveToNext()) {
             boolean i = (cursor.getInt(3) == 1);
             boolean k = (cursor.getInt(4) == 1);
@@ -263,7 +263,7 @@ public class WishList extends Fragment {
 
     public void updateListView() {
         cursor = db.rawQuery("SELECT _Id, Wish, DateTime, Realized, Public, rowid " +
-                "FROM wish ORDER BY DateTime DESC", null);
+                "FROM wish ORDER BY DateTime DESC, rowid DESC", null);
         items.clear();
         while (cursor.moveToNext()) {
             boolean i = (cursor.getInt(3) == 1);

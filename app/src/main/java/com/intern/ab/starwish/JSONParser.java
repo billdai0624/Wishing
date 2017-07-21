@@ -77,8 +77,8 @@ public class JSONParser {
             conn.setUseCaches(false);
             conn.setDoInput(true);
             conn.setDoOutput(true);
-            conn.setReadTimeout(30000);
-            conn.setConnectTimeout(30000);
+            conn.setReadTimeout(20000);
+            conn.setConnectTimeout(20000);
 
             //Send request
             OutputStreamWriter writer = new OutputStreamWriter(conn.getOutputStream());

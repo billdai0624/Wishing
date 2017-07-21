@@ -131,7 +131,7 @@ public class WishWall extends Fragment implements LocationListener {
                 publicWishItemAdapter.clearStates();
                 footer.setVisibility(View.VISIBLE);
                 publicWish_list.removeFooterView(footer);
-                publicWish_list.addFooterView(footer);
+                publicWish_list.addFooterView(footer, null, false);
                 switch (checkedId) {
                     case R.id.hot:
 
@@ -146,7 +146,7 @@ public class WishWall extends Fragment implements LocationListener {
                             lowerBound = 0;
                             cheeringSorted();
                         } else {
-                            Toast.makeText(getActivity(), getString(R.string.no_network), Toast.LENGTH_LONG).show();
+                            Toast.makeText(getActivity(), getString(R.string.no_network), Toast.LENGTH_SHORT).show();
                         }
                         break;
                     case R.id.newest:
@@ -161,7 +161,7 @@ public class WishWall extends Fragment implements LocationListener {
                             lastData_id = -1;
                             timeSorted();
                         } else {
-                            Toast.makeText(getActivity(), getString(R.string.no_network), Toast.LENGTH_LONG).show();
+                            Toast.makeText(getActivity(), getString(R.string.no_network), Toast.LENGTH_SHORT).show();
                         }
                         break;
                     case R.id.near:
@@ -175,7 +175,7 @@ public class WishWall extends Fragment implements LocationListener {
                         if (isConnected()) {
                             distanceSorted();
                         } else {
-                            Toast.makeText(getActivity(), getString(R.string.no_network), Toast.LENGTH_LONG).show();
+                            Toast.makeText(getActivity(), getString(R.string.no_network), Toast.LENGTH_SHORT).show();
                         }
                         break;
                     default:
@@ -187,7 +187,7 @@ public class WishWall extends Fragment implements LocationListener {
         footer = LayoutInflater.from(getActivity()).inflate(R.layout.footer, null);
         loading = (ImageView) footer.findViewById(R.id.loading);
         loadingAnim = (AnimationDrawable) loading.getBackground();
-        publicWish_list.addFooterView(footer);
+        publicWish_list.addFooterView(footer, null, false);
         publicWish_list.setAdapter(publicWishItemAdapter);
         publicWish_list.setOnScrollListener(new OnScrollListener() {
             @Override
@@ -215,7 +215,7 @@ public class WishWall extends Fragment implements LocationListener {
 
                             //RunAnim runAnim=new RunAnim();
                         } else {
-                            Toast.makeText(getActivity(), getString(R.string.no_network), Toast.LENGTH_LONG).show();
+                            Toast.makeText(getActivity(), getString(R.string.no_network), Toast.LENGTH_SHORT).show();
                         }
                     }
                     /*else{
@@ -401,7 +401,7 @@ public class WishWall extends Fragment implements LocationListener {
                 if (isConnected()) {
                     timeSorted();
                 } else {
-                    Toast.makeText(getActivity(), getString(R.string.no_network), Toast.LENGTH_LONG).show();
+                    Toast.makeText(getActivity(), getString(R.string.no_network), Toast.LENGTH_SHORT).show();
                 }
             }
             if (((MainActivity) getActivity()).shouldRefresh) {
@@ -410,7 +410,7 @@ public class WishWall extends Fragment implements LocationListener {
                     publicWishItemAdapter.clearStates();
                     footer.setVisibility(View.VISIBLE);
                     publicWish_list.removeFooterView(footer);
-                    publicWish_list.addFooterView(footer);
+                    publicWish_list.addFooterView(footer, null, false);
                     switch (category.getCheckedRadioButtonId()) {
                         case R.id.hot:
                             lowerBound = 0;
@@ -471,7 +471,7 @@ public class WishWall extends Fragment implements LocationListener {
         protected void onPostExecute(String JSONString) {
             super.onPostExecute(JSONString);
             if (JSONString.equals("Fail")) {
-                Toast.makeText(getActivity(), getString(R.string.unstable_network), Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), getString(R.string.unstable_network), Toast.LENGTH_SHORT).show();
                 JSONString = "";
             } else {
                 if (mode == NEAR && items.size() != 0) {

@@ -102,6 +102,11 @@ public class DetailBlessingList extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
+            try {
+                imm.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+            } catch (Exception e) {
+                Log.e("Back Home Error ", e.toString());
+            }
             ((MainActivity) getActivity()).onBackPressed();
         }
         return true;
@@ -122,22 +127,27 @@ public class DetailBlessingList extends Fragment {
             public void onClick(View v) {
                 if (v.getId() == R.id.blessing_cheeringIcon) {
                     CheckBox cb = (CheckBox) v;
-                    cb.setChecked(cb.isChecked());
-                    JSONObject JObj = new JSONObject();
-                    try {
-                        if (cb.isChecked()) {
-                            JObj.put("newCheering", Integer.valueOf(cheeringNumTv.getText().toString()) + 1);
-                            JObj.put("cancel", 0);
-                        } else {
-                            JObj.put("newCheering", Integer.valueOf(cheeringNumTv.getText().toString()) - 1);
-                            JObj.put("cancel", 1);
+                    if (isConnected()) {
+                        cb.setChecked(cb.isChecked());
+                        JSONObject JObj = new JSONObject();
+                        try {
+                            if (cb.isChecked()) {
+                                JObj.put("newCheering", Integer.valueOf(cheeringNumTv.getText().toString()) + 1);
+                                JObj.put("cancel", 0);
+                            } else {
+                                JObj.put("newCheering", Integer.valueOf(cheeringNumTv.getText().toString()) - 1);
+                                JObj.put("cancel", 1);
+                            }
+                            JObj.put("_Id", detailWish_id);
+                            JObj.put("device_id", device_id);
+                            new sendCheering().execute(JObj);
+                            cheeringIcon.setEnabled(false);
+                        } catch (JSONException e) {
+                            Log.e("JSONError", e.toString());
                         }
-                        JObj.put("_Id", detailWish_id);
-                        JObj.put("device_id", device_id);
-                        new sendCheering().execute(JObj);
-                        cheeringIcon.setEnabled(false);
-                    } catch (JSONException e) {
-                        Log.e("JSONError", e.toString());
+                    } else {
+                        cb.setChecked(!cheeringIcon.isChecked());
+                        Toast.makeText(getActivity(), getString(R.string.no_network), Toast.LENGTH_SHORT).show();
                     }
                 }
             }
@@ -190,7 +200,7 @@ public class DetailBlessingList extends Fragment {
                     });
                     dialog.setCancelable(false);
                     dialog.show();
-                    Toast.makeText(getActivity(), getString(R.string.no_network), Toast.LENGTH_LONG).show();
+                    Toast.makeText(getActivity(), getString(R.string.no_network), Toast.LENGTH_SHORT).show();
                 }
                 if (imm.isActive()) {
                     imm.hideSoftInputFromWindow(blessingET.getWindowToken(), 0);
@@ -349,18 +359,23 @@ public class DetailBlessingList extends Fragment {
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
         if (isInit && isVisibleToUser) {
-            try {
-                if (blessingET.hasFocus()) {
-                    requestSoftInput(blessingET);
-                } else {
-                    //blessingET.requestFocus();
-                    //requestSoftInput(blessingET);
+            sendBlessing.setEnabled(true);
+            if (isConnected()) {
+                try {
+                    if (blessingET.hasFocus()) {
+                        requestSoftInput(blessingET);
+                    } else {
+                        //blessingET.requestFocus();
+                        //requestSoftInput(blessingET);
+                    }
+                    JSONObject JObj = new JSONObject();
+                    JObj.put("id", detailWish_id);
+                    JObj.put("deviceId", device_id);
+                } catch (JSONException e) {
+                    Log.e("JSONError", e.toString());
                 }
-                JSONObject JObj = new JSONObject();
-                JObj.put("id", detailWish_id);
-                JObj.put("deviceId", device_id);
-            } catch (JSONException e) {
-                Log.e("JSONError", e.toString());
+            } else {
+                Toast.makeText(getActivity(), getString(R.string.no_network), Toast.LENGTH_SHORT).show();
             }
         } else if (isInit && !isVisibleToUser) {
             ((MainActivity) getActivity()).pageHistory.clear();
@@ -502,14 +517,19 @@ public class DetailBlessingList extends Fragment {
 
         @Override
         protected void onPostExecute(String JSONString) {
-            try {
-                JSONArray JArray = new JSONArray(JSONString);
-                JSONObject JObj = JArray.getJSONObject(0);
-                cheeringNumTv.setText(Integer.toString(JObj.getInt("cheering")));
-                ((MainActivity) getActivity()).alterCheeringState(cheeringIcon.isChecked(), position);
+            if (JSONString.equals("Fail")) {
+                Toast.makeText(getActivity(), getString(R.string.unstable_network), Toast.LENGTH_SHORT).show();
+                JSONString = "";
+            } else {
+                try {
+                    JSONArray JArray = new JSONArray(JSONString);
+                    JSONObject JObj = JArray.getJSONObject(0);
+                    cheeringNumTv.setText(Integer.toString(JObj.getInt("cheering")));
+                    ((MainActivity) getActivity()).alterCheeringState(cheeringIcon.isChecked(), position);
 
-            } catch (JSONException e) {
-                Log.e("JSONError", e.toString());
+                } catch (JSONException e) {
+                    Log.e("JSONError", e.toString());
+                }
             }
             cheeringIcon.setEnabled(true);
         }

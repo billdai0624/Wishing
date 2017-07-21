@@ -1,6 +1,8 @@
 package com.intern.ab.starwish;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -10,6 +12,7 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -92,22 +95,27 @@ public class PublicWishAdapter extends ArrayAdapter<PublicWish_item> {
             @Override
             public void onClick(View v) {
                 CheckBox cb = (CheckBox) v;
-                JSONObject JObj = new JSONObject();
-                cheeringCheckedState.set(position, cb.isChecked());
-                try {
-                    if (cb.isChecked()) {
-                        JObj.put("newCheering", item.getCheeringNum() + 1);
-                        JObj.put("cancel", 0);
-                    } else {
-                        JObj.put("newCheering", item.getCheeringNum() - 1);
-                        JObj.put("cancel", 1);
+                if (isConnected()) {
+                    JSONObject JObj = new JSONObject();
+                    cheeringCheckedState.set(position, cb.isChecked());
+                    try {
+                        if (cb.isChecked()) {
+                            JObj.put("newCheering", item.getCheeringNum() + 1);
+                            JObj.put("cancel", 0);
+                        } else {
+                            JObj.put("newCheering", item.getCheeringNum() - 1);
+                            JObj.put("cancel", 1);
+                        }
+                        JObj.put("_Id", item.getWish_id());
+                        JObj.put("device_id", device_id);
+                        new sendCheering(item).execute(JObj);
+                        holder.cheering.setEnabled(false);
+                    } catch (JSONException e) {
+                        Log.e("JSONError", e.toString());
                     }
-                    JObj.put("_Id", item.getWish_id());
-                    JObj.put("device_id", device_id);
-                    new sendCheering(item).execute(JObj);
-                    holder.cheering.setEnabled(false);
-                } catch (JSONException e) {
-                    Log.e("JSONError", e.toString());
+                }
+                else{
+                    Toast.makeText(getContext(), getContext().getString(R.string.no_network), Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -158,6 +166,14 @@ public class PublicWishAdapter extends ArrayAdapter<PublicWish_item> {
         blessingCheckedState.clear();
     }
 
+    private boolean isConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+        if (networkInfo != null && networkInfo.isConnected()) {
+            return true;
+        }
+        return false;
+    }
   /*  class onCheckedChangeListener implements OnCheckedChangeListener {
         PublicWish_item item;
 

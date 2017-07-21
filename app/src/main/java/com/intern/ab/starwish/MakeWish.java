@@ -139,7 +139,7 @@ public class MakeWish extends AppCompatActivity implements LocationListener {
                 try {
                     if (isConnected()) {
                         if ("".equals(wish.getText().toString().trim()) || null == db) {
-                            Toast.makeText(getApplicationContext(), getString(R.string.wish_denial_toast), Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), getString(R.string.wish_denial_toast), Toast.LENGTH_SHORT).show();
                         } else {
                             send.setEnabled(false);
                             intent = new Intent();
@@ -192,7 +192,7 @@ public class MakeWish extends AppCompatActivity implements LocationListener {
 
                         }
                     } else {
-                        Toast.makeText(getApplication(), getResources().getString(R.string.no_network), Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplication(), getResources().getString(R.string.no_network), Toast.LENGTH_SHORT).show();
                     }
                 } catch (Exception e) {
                     Log.e("", e.toString());
@@ -240,7 +240,7 @@ public class MakeWish extends AppCompatActivity implements LocationListener {
                     latitude = cursor.getDouble(1);
                 }
             } else {
-                Toast.makeText(this, "Your location is unavailable", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Your location is unavailable", Toast.LENGTH_SHORT).show();
             }
             cursor.close();
         }

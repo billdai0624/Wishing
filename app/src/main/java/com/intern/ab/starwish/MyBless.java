@@ -1,7 +1,10 @@
 package com.intern.ab.starwish;
 
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -14,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -80,16 +84,29 @@ public class MyBless extends Fragment {
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         if (isInit && isVisibleToUser) {
-            JSONObject JObj = new JSONObject();
-            try {
-                JObj.put("device_id", device_id);
-            } catch (JSONException e) {
-                Log.e("JSONError", e.toString());
+            if (isConnected()) {
+                JSONObject JObj = new JSONObject();
+                try {
+                    JObj.put("device_id", device_id);
+                } catch (JSONException e) {
+                    Log.e("JSONError", e.toString());
+                }
+                new getFromSQL().execute(JObj);
+            } else {
+                Toast.makeText(getActivity(), getString(R.string.no_network), Toast.LENGTH_SHORT).show();
             }
-            new getFromSQL().execute(JObj);
         } else {
 
         }
+    }
+
+    private boolean isConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+        if (networkInfo != null && networkInfo.isConnected()) {
+            return true;
+        }
+        return false;
     }
 
     class getFromSQL extends AsyncTask<JSONObject, Void, String> {
@@ -106,20 +123,25 @@ public class MyBless extends Fragment {
 
         @Override
         protected void onPostExecute(String JSONString) {
-            blessing_items.clear();
-            try {
-                JSONArray JArray = new JSONArray(JSONString);
-                for (int i = 0; i < JArray.length(); i++) {
-                    JSONObject JObj = JArray.getJSONObject(i);
-                    boolean realized = (JObj.getInt("realized") == 1);
-                    blessing_items.add(new Blessing_item(JObj.getInt("wish_id"), JObj.getString("wish"), JObj.getString("time"), JObj.getInt("cheering"), realized));
+            if (JSONString.equals("Fail")) {
+                Toast.makeText(getActivity(), getString(R.string.unstable_network), Toast.LENGTH_SHORT).show();
+                JSONString = "";
+            } else {
+                try {
+                    JSONArray JArray = new JSONArray(JSONString);
+                    blessing_items.clear();
+                    for (int i = 0; i < JArray.length(); i++) {
+                        JSONObject JObj = JArray.getJSONObject(i);
+                        boolean realized = (JObj.getInt("realized") == 1);
+                        blessing_items.add(new Blessing_item(JObj.getInt("wish_id"), JObj.getString("wish"), JObj.getString("time"), JObj.getInt("cheering"), realized));
+                    }
+                    blessingAdapter.notifyDataSetChanged();
+                    if (!blessing_items.isEmpty()) {
+                        myBless_hint.setVisibility(View.GONE);
+                    }
+                } catch (JSONException e) {
+                    Log.e("JSONError", e.toString());
                 }
-                blessingAdapter.notifyDataSetChanged();
-                if (!blessing_items.isEmpty()) {
-                    myBless_hint.setVisibility(View.GONE);
-                }
-            } catch (JSONException e) {
-                Log.e("JSONError", e.toString());
             }
         }
     }

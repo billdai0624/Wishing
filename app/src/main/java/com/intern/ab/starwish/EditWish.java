@@ -80,7 +80,7 @@ public class EditWish extends AppCompatActivity implements LocationListener {
         try {
             db = dbHelper.getWritableDatabase();
         } catch (SQLiteException e) {
-            Toast.makeText(getApplicationContext(), "Check whether your disk is full", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Check whether your disk is full", Toast.LENGTH_SHORT).show();
             onBackPressed();
         }
         LocationManager status = (LocationManager) (this.getSystemService(Context.LOCATION_SERVICE));
@@ -164,7 +164,7 @@ public class EditWish extends AppCompatActivity implements LocationListener {
                 longitude = cursor.getDouble(0);
                 latitude = cursor.getDouble(1);
             } else {
-                Toast.makeText(this, "Your location is unavailable", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Your location is unavailable", Toast.LENGTH_SHORT).show();
             }
             cursor.close();
         }
@@ -238,7 +238,7 @@ public class EditWish extends AppCompatActivity implements LocationListener {
                 intent.putExtras(bun);*/
                 if (isConnected()) {
                     if ("".equals(editWish.getText().toString().trim()) || null == db) {
-                        Toast.makeText(getApplicationContext(), getString(R.string.wish_denial_toast), Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), getString(R.string.wish_denial_toast), Toast.LENGTH_SHORT).show();
                     } else {
                         detailWish_id = getIntent().getStringExtra("detailWish_id");
                         cursor = db.rawQuery("SELECT Public FROM wish WHERE _Id=?", new String[]{detailWish_id});
@@ -285,7 +285,7 @@ public class EditWish extends AppCompatActivity implements LocationListener {
                         finish();
                     }
                 } else {
-                    Toast.makeText(this, getResources().getString(R.string.no_network), Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, getResources().getString(R.string.no_network), Toast.LENGTH_SHORT).show();
                 }
                 return true;
             case android.R.id.home:
