@@ -4,27 +4,27 @@
     <locations class="java.util.ArrayList">
         <statePointEntry>
             <state class="com.android.tools.idea.editors.navigation.model.ActivityState"
-                className="com.intern.ab.starwish.MainActivity" />
+                className="com.intern.ab.starwish.ui.MainActivity" />
             <point x="500" y="100" />
         </statePointEntry>
         <statePointEntry>
             <state class="com.android.tools.idea.editors.navigation.model.MenuState"
-                className="com.intern.ab.starwish.MainActivity" />
+                className="com.intern.ab.starwish.ui.MainActivity" />
             <point x="1768" y="100" />
         </statePointEntry>
         <statePointEntry>
             <state class="com.android.tools.idea.editors.navigation.model.ActivityState"
-                className="com.intern.ab.starwish.EditWish" />
+                className="com.intern.ab.starwish.ui.wish_list.edit.EditWish" />
             <point x="500" y="1480" />
         </statePointEntry>
         <statePointEntry>
             <state class="com.android.tools.idea.editors.navigation.model.MenuState"
-                className="com.intern.ab.starwish.EditWish" />
+                className="com.intern.ab.starwish.ui.wish_list.edit.EditWish" />
             <point x="1768" y="1480" />
         </statePointEntry>
         <statePointEntry>
             <state class="com.android.tools.idea.editors.navigation.model.ActivityState"
-                className="com.intern.ab.starwish.MakeWish" />
+                className="com.intern.ab.starwish.ui.make_wish.MakeWish" />
             <point x="500" y="2860" />
         </statePointEntry>
     </locations>

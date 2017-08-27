@@ -21,7 +21,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".WelcomeAnimation"
+            android:name=".ui.animation.WelcomeAnimation"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.NoActionBar">
             <intent-filter>
@@ -30,7 +30,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.MainActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -39,26 +39,26 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Celebration_animation"
+            android:name=".ui.animation.Celebration_animation"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.NoActionBar"></activity>
 
         <activity
-            android:name=".EditWish"
+            android:name=".ui.wish_list.edit.EditWish"
             android:label="editWish"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan">
 
         </activity>
         <activity
-            android:name=".MakeWish"
+            android:name=".ui.make_wish.MakeWish"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.NoActionBar">
 
         </activity>
         <activity
-            android:name=".MakeWish_animation"
+            android:name=".ui.animation.MakeWish_animation"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.NoActionBar">
 
@@ -69,7 +69,7 @@
             android:value="@integer/google_play_services_version" />
 
         <receiver
-            android:name=".GCMBroadcastReceiver"
+            android:name=".gcm.GCMBroadcastReceiver"
             android:permission="com.google.android.c2dm.permission.SEND">
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
@@ -77,6 +77,6 @@
             </intent-filter>
         </receiver>
 
-        <service android:name=".GCMIntentService" />
+        <service android:name=".gcm.GCMIntentService" />
     </application>
 </manifest>
